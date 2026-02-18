@@ -1,0 +1,13 @@
+<body>
+    <p>Our deliver executive is on his way to deliver your shipment. Please ensure you are available at the delivery
+        location and answer to rider's incoming call.</p>
+        {% if verification_code %}
+        <p style="font-size: 16px; margin-top: 20px;">
+        <strong>Verification Code:</strong> 
+        <span style="font-size: 24px; color: #8a2be2; font-weight: bold; letter-spacing: 2px;">
+            {{ verification_code }}
+        </span>
+        {% endif %}
+    <br>
+    <p>Powered by FastShip</p>
+</body>
