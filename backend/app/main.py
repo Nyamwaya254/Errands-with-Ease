@@ -51,6 +51,4 @@ app.add_middleware(
 app.include_router(master_router)
 
 
-@app.get("/")
-async def router():
-    return {"message": "Hello World"}
+
