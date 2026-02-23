@@ -8,24 +8,20 @@ from app.utils import generate_url_safe_token
 from app.config import app_settings
 from app.database.redis import add_errand_verification_code
 
-"""Service for managing shipment events"""
 
+class ErrandEventService(BaseService[ErrandEvent]):
+    """Service for managing shipment events"""
 
-class ErrandEventService(BaseService):
-    def __init__(self, session: AsyncSession):
-        # Pass Errandevent as the model to BaseService so it knows  which table this service is responsible for
+    def __init__(self, session: AsyncSession) -> None:
         super().__init__(ErrandEvent, session)
 
-    """get the most recent event from shipment timeline"""
-
     async def get_latest_event(self, errand: Orders):
+        """get the most recent event from shipment timeline"""
         timeline = errand.timeline
         # sort events oldest to newest by creation
         timeline.sort(key=lambda event: event.created_at)
         # return last item which the the most recent item
         return timeline[-1]
-
-    """Add and persist a new shipment event"""
 
     async def add(
         self,
@@ -34,6 +30,7 @@ class ErrandEventService(BaseService):
         status: Optional[OrderStatus] = None,
         description: Optional[str] = None,
     ) -> ErrandEvent:
+        """Add and persist a new shipment event"""
         if location is None or status is None:
             if errand.timeline:
                 # Get location/status from last event if timeline exists
@@ -65,6 +62,7 @@ class ErrandEventService(BaseService):
         return await self._add(new_event)
 
     def _generate_description(self, errand_status: OrderStatus, location: int):
+        """Generate description for different status"""
         match errand_status:
             case OrderStatus.placed:
                 return "Assigned delivery partner"
@@ -78,6 +76,7 @@ class ErrandEventService(BaseService):
                 return f"Scanned at {location}"
 
     async def _notify(self, errand: Orders, status: OrderStatus):
+        """Notify client when errand status changes by sending email"""
         if status == OrderStatus.in_transit:
             return
 

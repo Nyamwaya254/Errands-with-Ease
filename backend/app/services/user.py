@@ -22,15 +22,12 @@ ModelType = TypeVar(
 )  # make UserService generic so as to initialize only once and avoid overriding
 
 
-"""User service that can be inherited by client and delivery_partner"""
-
-
 class UserService(BaseService[ModelType]):
-    """Creates a new user, hashes their password, saves them to the database,
-    and sends a verification email.
-    """
+    """User service that can be inherited by client and delivery_partner"""
 
     async def _add_user(self, data: dict, router_prefix: str):
+        """Creates a new user, hashes their password, saves them to the database,
+        and sends a verification email."""
         user = self.model(
             **data,
             password_hash=password_context.hash(data["password"]),
@@ -55,16 +52,14 @@ class UserService(BaseService[ModelType]):
         )
         return user
 
-    """Look up a user in the database by their email address."""
-
     async def _get_by_email(self, email) -> User | None:
+        """Look up a user in the database by their email address."""
         return await self.session.scalar(
             select(self.model).where(self.model.email == email)
         )
 
-    """Verifies a user's email address using a token sent to them during registration."""
-
     async def verify_email(self, token: str):
+        """Verifies a user's email address using a token sent to them during registration."""
         token_data = decode_url_safe_token(token)
 
         if not token_data:
@@ -75,9 +70,9 @@ class UserService(BaseService[ModelType]):
         user.email_verified = True
         await self._update(user)
 
-    """Generates a password reset token and emails a reset link to the user."""
-
     async def send_password_reset_link(self, email, router_prefix):
+        """Generates a password reset token and emails a reset link to the user."""
+
         user = await self._get_by_email(email)
 
         token = generate_url_safe_token({"id": str(user.id)}, salt="password-reset")
@@ -92,9 +87,8 @@ class UserService(BaseService[ModelType]):
             template_name="password_reset.html",
         )
 
-    """Resets a user's password using a valid password reset token."""
-
     async def reset_password(self, token: str, password: str) -> bool:
+        """Resets a user's password using a valid password reset token."""
         token_data = decode_url_safe_token(
             token, salt="password-reset", expiry=timedelta(days=1)
         )
@@ -107,9 +101,8 @@ class UserService(BaseService[ModelType]):
         await self._update(user)
         return True
 
-    """Validates user credentials and generates a JWT access token for authentication."""
-
     async def _generate_token(self, email, password):
+        """Validates user credentials and generates a JWT access token for authentication."""
         # validate credentials
         user = await self._get_by_email(email)
 

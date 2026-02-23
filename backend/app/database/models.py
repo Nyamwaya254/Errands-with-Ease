@@ -2,8 +2,9 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID, uuid4
 from pydantic import EmailStr
-from sqlmodel import Column, Field, Relationship, SQLModel
+from sqlmodel import Column, Field, Relationship, SQLModel, select
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class OrderStatus(str, Enum):
@@ -22,6 +23,44 @@ class TagName(str, Enum):
     PARCEL = "parcel"
     ELECTRONICS = "electronics"
 
+    async def tag(self, session: AsyncSession):
+        tag = await session.scalar(select(Tag).where(Tag.name == self.value))
+        if tag is None:
+            tag = Tag(name=self.value)
+            session.add(tag)
+            await session.commit()
+        return tag
+
+
+class ErrandTag(SQLModel, table=True):
+    __tablename__ = "shipment_tag"
+    tag_id: UUID = Field(
+        foreign_key="tag.id",
+        primary_key=True,
+    )
+
+    shipment_id: UUID = Field(
+        foreign_key="orders.id",
+        primary_key=True,
+    )
+
+
+class Tag(SQLModel, table=True):
+    id: UUID = Field(
+        sa_column=Column(
+            postgresql.UUID,
+            default=uuid4,
+            primary_key=True,
+        )
+    )
+    name: TagName
+    instruction: str
+    errands: list["Orders"] = Relationship(
+        back_populates="tags",
+        link_model=ErrandTag,
+        sa_relationship_kwargs={"lazy": "immediate"},
+    )
+
 
 class Orders(SQLModel, table=True):
     """Table for the orders placed"""
@@ -38,6 +77,7 @@ class Orders(SQLModel, table=True):
     client_contact_email: EmailStr
     client_contact_phone: str | None
     destination: int
+    estimated_delivery: datetime
     content: str
     weight: float = Field(le=150)
     created_at: datetime = Field(
@@ -59,6 +99,11 @@ class Orders(SQLModel, table=True):
     timeline: list["ErrandEvent"] = Relationship(
         back_populates="errands",
         sa_relationship_kwargs={"lazy": "selectin"},
+    )
+    tags: list[Tag] = Relationship(
+        back_populates="errands",
+        link_model=ErrandTag,
+        sa_relationship_kwargs={"lazy": "immediate"},
     )
 
     @property

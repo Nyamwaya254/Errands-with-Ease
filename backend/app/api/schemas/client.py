@@ -6,9 +6,9 @@ class BaseClient(BaseModel):
     email: EmailStr
 
 
-class ClentCreate(BaseClient):
+class ClientCreate(BaseClient):
     password: str = Field(max_length=72)
 
 
-class SellerRead(BaseClient):
+class ClientRead(BaseClient):
     pass

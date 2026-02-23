@@ -14,6 +14,7 @@ class BaseErrand(BaseModel):
     content: str
     weight: float = Field(le=150)
     destination: int
+    shop_picked_at: str | None = Field(default=None)
 
 
 class ErrandCreate(BaseErrand):
@@ -22,7 +23,11 @@ class ErrandCreate(BaseErrand):
 
 
 class ErrandUpdate(BaseModel):
-    status: OrderStatus
+    location: int | None = Field(default=None)
+    status: OrderStatus | None = Field(default=None)
+    verification_code: str | None = Field(default=None)
+    description: str | None = Field(default=None)
+    estimated_delivery: datetime | None = Field(default=None)
 
 
 class ErrandRead(BaseErrand):
