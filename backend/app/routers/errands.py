@@ -71,10 +71,10 @@ async def get_errand(id: UUID, service: ErrandServiceDep):
     """Retrieve a single errand by its uuid"""
 
     errand = await service.get(id)
-    if errand is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Given id does not exist"
-        )
+        if errand is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Given id does not exist"
+            )
     return errand
 
 
