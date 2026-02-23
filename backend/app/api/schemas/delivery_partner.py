@@ -4,7 +4,7 @@ from pydantic import BaseModel, EmailStr, Field
 class BaseDeliveryPartner(BaseModel):
     name: str
     email: EmailStr
-    servicable_zip_codes: list[int] = []
+    serviceable_zip_codes: list[int] = []
     max_handling_capacity: int
 
 

@@ -11,10 +11,10 @@ from app.config import security_settings
 # initialized once with the secret key so it's reused across all calls
 _serializer = URLSafeTimedSerializer(security_settings.JWT_SECRET_KEY)
 
-"""Generate a signed JWT access token."""
-
 
 def generate_access_token(data: dict, expiry: timedelta = timedelta(days=3)) -> str:
+    """Generate a signed JWT access token."""
+
     return jwt.encode(
         payload={**data, "jti": str(uuid4), "exp": datetime.now(timezone.utc) + expiry},
         algorithm=security_settings.JWT_ALGORITHM,
@@ -22,10 +22,9 @@ def generate_access_token(data: dict, expiry: timedelta = timedelta(days=3)) -> 
     )
 
 
-"""Decode and verify a JWT access token."""
-
-
 def decode_access_token(token: str) -> dict | None:
+    """Decode and verify a JWT access token."""
+
     try:
         return jwt.decode(
             jwt=token,
@@ -40,19 +39,15 @@ def decode_access_token(token: str) -> dict | None:
         return None
 
 
-"""Generate a URL-safe signed token for use in verification links"""
-
-
 def generate_url_safe_token(data: dict, salt: str | None = None) -> str:
+    """Generate a URL-safe signed token for use in verification links"""
     return _serializer.dumps(data, salt=salt)
-
-
-"""    Decode and verify a URL-safe token"""
 
 
 def decode_url_safe_token(
     token: str, salt: str | None = None, expiry: timedelta | None = None
 ) -> dict | None:
+    """Decode and verify a URL-safe token"""
     try:
         return _serializer.loads(
             token,
