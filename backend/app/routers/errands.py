@@ -91,10 +91,10 @@ async def get_tracking(request: Request, id: UUID, service: ErrandServiceDep):
     errand = await service.get(id)
 
     if errand is None:
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Errand with id {id} does not exist",
-    )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Errand with id {id} does not exist",
+        )
     context = errand.model_dump()
     context["status"] = errand.status
     context["partner"] = errand.partner.name
