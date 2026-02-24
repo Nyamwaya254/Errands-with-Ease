@@ -23,12 +23,13 @@ class TagName(str, Enum):
     PARCEL = "parcel"
     ELECTRONICS = "electronics"
 
-    async def tag(self, session: AsyncSession):
+    async def tag(self, session: AsyncSession, instruction: str | None = None):
         tag = await session.scalar(select(Tag).where(Tag.name == self.value))
         if tag is None:
-            tag = Tag(name=self.value)
+            tag = Tag(name=self.value, instruction=instruction)
             session.add(tag)
             await session.commit()
+            await session.refresh(tag)
         return tag
 
 
@@ -54,7 +55,7 @@ class Tag(SQLModel, table=True):
         )
     )
     name: TagName
-    instruction: str
+    instruction: str | None = Field(default=None)
     errands: list["Orders"] = Relationship(
         back_populates="tags",
         link_model=ErrandTag,

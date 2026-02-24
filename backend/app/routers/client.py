@@ -14,7 +14,7 @@ from app.api.schemas.client import ClientCreate, ClientRead
 from app.core.security import TokenData
 from app.config import app_settings
 
-APP_DIR = Path(__file__).resolve().parent
+APP_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = APP_DIR / "templates"
 
 templates = Jinja2Templates(TEMPLATE_DIR)
@@ -50,7 +50,7 @@ async def get_reset_password(request: Request, token: str):
         request=request,
         name="password/reset.html",
         context={
-            "reset_url": f"http//{app_settings.APP_DOMAIN}{router.prefix}/reset_password?token={token}"
+            "reset_url": f"http://{app_settings.APP_DOMAIN}{router.prefix}/reset_password?token={token}"
         },
     )
 

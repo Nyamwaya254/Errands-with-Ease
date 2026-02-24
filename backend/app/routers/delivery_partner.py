@@ -14,7 +14,7 @@ from app.api.schemas.delivery_partner import (
     DeliveryPartnerRead,
     DeliveryPartnerUpdate,
 )
-from backend.app.core.security import TokenData
+from app.core.security import TokenData
 
 router = create_auth_router(
     prefix="/partner",
