@@ -82,7 +82,7 @@ class UserService(BaseService[ModelType]):
             subject="Errands with Ease reset Password",
             context={
                 "username": user.name,
-                "reset_url": f"http://{app_settings.APP_DOMAIN}/{router_prefix}/reset_password_form?token={token}",
+                "reset_url": f"http://{app_settings.APP_DOMAIN}/{router_prefix.strip('/')}/reset_password_form?token={token}",
             },
             template_name="password_reset.html",
         )

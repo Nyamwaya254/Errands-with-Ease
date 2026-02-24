@@ -10,7 +10,7 @@ description = """
 Errands Management System for Clients and delivery agents
 
 ###Seller
--SUbmit a errands effortless
+-Submit a errands effortless
 -Share tracking links with customers
 
 ###Delivery Agent
@@ -49,6 +49,3 @@ app.add_middleware(
 )
 
 app.include_router(master_router)
-
-
-

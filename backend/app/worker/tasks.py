@@ -1,5 +1,5 @@
+import asyncio
 from pathlib import Path
-from asgiref.sync import async_to_sync
 from celery import Celery  # type: ignore[import-untyped]
 from pydantic import EmailStr
 from twilio.rest import Client  # type: ignore[import-untyped]
@@ -14,7 +14,7 @@ from fastapi_mail import (
 from app.config import notification_settings, db_settings
 
 
-APP_DIR = Path(__file__).resolve().parent
+APP_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = APP_DIR / "templates"
 
 # fastmail setup for sending emails
@@ -27,18 +27,15 @@ fast_mail = FastMail(
     )
 )
 
-# Twilio setup for sending sms
+# twilio setup for sending sms
 twilio_client = Client(
     notification_settings.TWILIO_AUTH_TOKEN,
     notification_settings.TWILIO_SID,
 )
 
-# convert to synchronous since celery tasks are synchronous
-send_message = async_to_sync(fast_mail.send_message)
-
-# creates a celery app
+# create a celery app
 app = Celery(
-    "api_tasks",  # the name of the celery app
+    "api_tasks",  # name of the celery app
     broker=db_settings.REDIS_URL(
         9
     ),  # redis is used as message broker which receives and queues tasks
@@ -48,27 +45,21 @@ app = Celery(
 
 
 @app.task(name="send_mail")
-def send_mail(
-    recipients: list[str],
-    subject: str,
-    body: str,
-):
+def send_mail(recipients: list[str], subject: str, body: str):
     """Celery task to send a plain text mail"""
-
     recipient_list = [
-        NameEmail(name=str(email), email=str(email))
-        for email in recipients
-        # Wraps each email into a NameEmail object (display name + address)
+        NameEmail(name=str(email), email=str(email)) for email in recipients
     ]
-    send_message(
-        MessageSchema(
-            recipients=recipient_list,
-            subject=subject,
-            body=body,
-            subtype=MessageType.plain,
+    asyncio.run(
+        fast_mail.send_message(
+            MessageSchema(
+                recipients=recipient_list,
+                subject=subject,
+                body=body,
+                subtype=MessageType.plain,
+            )
         )
     )
-
     return "Message Sent!"
 
 
@@ -83,15 +74,21 @@ def send_email_with_template(
     recipient_list = [
         NameEmail(name=str(email), email=str(email)) for email in recipients
     ]
-    send_message(
-        message=MessageSchema(
-            recipients=recipient_list,
-            subject=subject,
-            template_body=context,
-            subtype=MessageType.html,
-        ),
-        template_name=template_name,
-    )
+    try:
+        asyncio.run(
+            fast_mail.send_message(
+                message=MessageSchema(
+                    recipients=recipient_list,
+                    subject=subject,
+                    template_body=context,
+                    subtype=MessageType.html,
+                ),
+                template_name=template_name,
+            )
+        )
+    except Exception as e:
+        print(f"EMAIL ERROR: {type(e).__name__}: {e}")
+        raise  # marks task as FAILED in Celery
 
 
 @app.task(name="send_sms")

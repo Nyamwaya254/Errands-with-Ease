@@ -29,6 +29,7 @@ async def add_errand_verification_code(id: UUID, code: int):
     await _errand_verification_codes.set(str(id), code)
 
 
-async def get_errand_verification_code(id: UUID) -> str:
+async def get_errand_verification_code(id: UUID) -> int:
     """Retrieves the stored code for a given shipment"""
-    return await _errand_verification_codes.get(str(id))
+    value = await _errand_verification_codes.get(str(id))
+    return int(value)

@@ -7,7 +7,7 @@ from app.database.models import ErrandEvent, OrderStatus, TagName
 
 class TagRead(BaseModel):
     name: TagName
-    instruction: str
+    instruction: str | None = Field(default=None)
 
 
 class BaseErrand(BaseModel):

@@ -17,7 +17,7 @@ class DeliveryPartnerService(UserService[DeliveryPartner]):
         """Registers a new delivery partner and assigns their servicable locations"""
         partner: DeliveryPartner = await self._add_user(
             partner_create.model_dump(exclude={"serviceable_zip_codes"}),
-            "delivery_partner",
+            "partner",
         )
         # loops through the codes the partner provides to see if they exist in Location table then creates new entry if it doesnt exist
         # to the location and servicablelocations tabless

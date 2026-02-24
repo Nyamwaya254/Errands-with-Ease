@@ -30,7 +30,7 @@ class ErrandService(BaseService[Orders]):
         return await self._get(id)
 
     async def add(self, errand_create: ErrandCreate, client: Client) -> Orders:
-        """Create a new errand,assign a delibery partner and record the initial event"""
+        """Create a new errand,assign a delivery partner and record the initial event"""
         new_errand = Orders(
             **errand_create.model_dump(),
             status=OrderStatus.placed,
@@ -129,7 +129,9 @@ class ErrandService(BaseService[Orders]):
             )
         await self._delete(errand)
 
-    async def add_tag(self, id: UUID, tag_name: TagName) -> Orders:
+    async def add_tag(
+        self, id: UUID, tag_name: TagName, instruction: str | None = None
+    ) -> Orders:
         """Adds a tag to an errand ie fragile"""
         errand = await self.get(id)
         if errand is None:
@@ -137,5 +139,5 @@ class ErrandService(BaseService[Orders]):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Errand not found",
             )
-        errand.tags.append(await tag_name.tag(self.session))
+        errand.tags.append(await tag_name.tag(self.session, instruction))
         return await self._update(errand)

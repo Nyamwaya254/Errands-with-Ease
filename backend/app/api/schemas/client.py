@@ -8,7 +8,10 @@ class BaseClient(BaseModel):
 
 class ClientCreate(BaseClient):
     password: str = Field(max_length=72)
+    address: str | None = Field(default=None)
+    zip_code: int | None = Field(default=None)
 
 
 class ClientRead(BaseClient):
-    pass
+    address: str | None = Field(default=None)
+    zip_code: int | None = Field(default=None)

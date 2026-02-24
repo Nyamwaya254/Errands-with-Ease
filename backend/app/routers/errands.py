@@ -10,7 +10,7 @@ from app.api.dependancies import (
     SessionDep,
     ClientDep,
 )
-from backend.app.worker.tasks import TEMPLATE_DIR
+from app.worker.tasks import TEMPLATE_DIR
 
 router = APIRouter(prefix="/errand", tags=["Errands"])
 
@@ -18,9 +18,11 @@ templates = Jinja2Templates(TEMPLATE_DIR)
 
 
 @router.get("/tag", response_model=ErrandRead)
-async def add_tag_to_errand(id: UUID, tag_name: TagName, service: ErrandServiceDep):
+async def add_tag_to_errand(
+    id: UUID, tag_name: TagName, instruction: str | None, service: ErrandServiceDep
+):
     """Add a tag to an existing errand"""
-    return await service.add_tag(id, tag_name)
+    return await service.add_tag(id, tag_name, instruction)
 
 
 @router.get("/tagged")
@@ -71,10 +73,10 @@ async def get_errand(id: UUID, service: ErrandServiceDep):
     """Retrieve a single errand by its uuid"""
 
     errand = await service.get(id)
-        if errand is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Given id does not exist"
-            )
+    if errand is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Given id does not exist"
+        )
     return errand
 
 
