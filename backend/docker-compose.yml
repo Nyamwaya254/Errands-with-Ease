@@ -1,0 +1,65 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: errands:latest
+    container_name: errands_with_ease
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+    depends_on:
+      - postgres
+      - redis
+        
+    environment:
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: errands_postgres
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=errands_with_ease
+      - POSTGRES_USER=bill
+      - POSTGRES_PASSWORD=billytheegoat
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    
+
+  redis:
+    image: redis:7-alpine
+    container_name: errands_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis_data:/data
+
+  celery:
+    build: .
+    container_name: errands_celery
+    command: ["celery", "-A", "app.worker.tasks", "worker", "--loglevel=info"]
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app/app
+    depends_on:
+      - postgres 
+      - redis
+        
+    environment:
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
