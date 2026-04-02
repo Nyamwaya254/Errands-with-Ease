@@ -50,7 +50,7 @@ async def get_reset_password(request: Request, token: str):
         request=request,
         name="password/reset.html",
         context={
-            "reset_url": f"http//{app_settings.APP_DOMAIN}{router.prefix}/reset_password?token={token}"
+            "reset_url": f"http://{app_settings.APP_DOMAIN}{router.prefix}/reset_password?token={token}"
         },
     )
 
