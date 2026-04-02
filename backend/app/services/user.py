@@ -37,7 +37,7 @@ class UserService(BaseService[ModelType]):
         token = generate_url_safe_token(
             {
                 "email": user.email,
-                "id": str(user.id),  # type: ignore[attr-defined]
+                "id": str(user.id),  # type: ignore[attr-defined ]
             }
         )
         # send email to verify user with verification link

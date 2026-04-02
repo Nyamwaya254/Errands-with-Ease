@@ -4,3 +4,5 @@ backend/venv/
 __pycache__/
 *.pyc
 venv/
+postgres_data/
+redis_data/
